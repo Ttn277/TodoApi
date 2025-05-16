@@ -16,22 +16,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest		//Khởi động toàn bộ ứng dụng Spring Boot để thực hiện test (giống như lúc chạy thật)
+@AutoConfigureMockMvc	// Cho phép sử dụng MockMvc để giả lập HTTP request mà ko cần chạy trên server thật(Tomcat, v.v)
 public class TodoApiApplicationTests {
 
 	@Autowired
-	private MockMvc mockMvc;
+	private MockMvc mockMvc;	// MockMvc : Dùng để gửi request giả lập dến các API endpoint
 
 	@Autowired
-	private TodoRepository todoRepository;
+	private TodoRepository todoRepository;		// TodoRepository : Truy câp cơ sở dữ liệu để kiểm tra dữ liệu thâtj sau khi API chạy
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	private ObjectMapper objectMapper; 	// Chuyển đổi object Java <-> JSON
 
-	@BeforeEach
+	@BeforeEach 	// Làm sạch dự liệu khi test
 	public void setUp() {
-		todoRepository.deleteAll();
+		todoRepository.deleteAll();	// Đảm bảo mỗi test đều bắt đầu với database rỗng - tránh có quá nhiều kết quả test
 	}
 
 	@Test
@@ -42,9 +42,9 @@ public class TodoApiApplicationTests {
 		todo1.setCompleted(false);
 		todoRepository.save(todo1);
 
-		mockMvc.perform(get("/api/todos"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].title").value("Test Todo 1"))
+		mockMvc.perform(get("/api/todos"))	// Gủi GET request
+				.andExpect(status().isOk())		// Kiểm tra HTTP 200 OK
+				.andExpect(jsonPath("$[0].title").value("Test Todo 1")) 	// Dùng jsonPATH để kiểm tra nội dung JSON trả về
 				.andExpect(jsonPath("$[0].description").value("Description for test todo 1"));
 	}
 
@@ -58,8 +58,8 @@ public class TodoApiApplicationTests {
 		mockMvc.perform(post("/api/todos")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(todo)))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.title").value("New Todo"))
+				.andExpect(status().isCreated()) 	// Kiểm tra HTTP 201 Created
+				.andExpect(jsonPath("$.title").value("New Todo"))	// xác nhận dự liệu được lưu vào database
 				.andExpect(jsonPath("$.description").value("This is a new todo"));
 
 		//DBに新しいTODOが作成されたか確認
@@ -79,7 +79,7 @@ public class TodoApiApplicationTests {
 		savedTodo.setTitle("Updated Todo");
 		savedTodo.setDescription("Updated description");
 
-		mockMvc.perform(put("/api/todos/" + savedTodo.getId())
+		mockMvc.perform(put("/api/todos/" + savedTodo.getId())	// Gửi PUT request để cập nhật cho todo
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(savedTodo)))
 				.andExpect(status().isOk())
@@ -101,9 +101,14 @@ public class TodoApiApplicationTests {
 		Todo savedTodo = todoRepository.save(todo);
 
 		mockMvc.perform(delete("/api/todos/" + savedTodo.getId()))
-				.andExpect(status().isOk());
+				.andExpect(status().isOk());	// Kiểm tra trả về HTTP 200 OK
 
 		//DBから削除されていることを確認
 		assertTrue(todoRepository.findById(savedTodo.getId()).isEmpty());
 	}
 }
+
+// Gợi ý mở rộng
+// Thêm test cho GET /api/todos/{id}
+// Thêm test cho trường hợp lỗi
+// Sử dụng @TestMethodOrder để kiểm tra theo thứ tự nếu cần

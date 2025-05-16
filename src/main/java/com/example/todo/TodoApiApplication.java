@@ -11,3 +11,12 @@ public class TodoApiApplication {
 	}
 
 }
+
+
+// SpringApplication.run() sẽ:
+// Khởi tạo Spring context
+// Tạo các bean
+// Cấu hình web server (Mặc định là Tomcat)
+// Bắt đầu lắng nghe request HTTP trên cổng mạc định (8080)
+
+
